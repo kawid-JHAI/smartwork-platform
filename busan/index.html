@@ -3573,6 +3573,12 @@
     // FRONT_BASE: GitHub 프론트 루트 주소, ADMIN_URL: 구글 로그인 관리자용 GAS 주소(직원 전용)
     const FRONT_BASE = 'https://kawid-jhai.github.io/smartwork-platform/';
     const ADMIN_URL = 'https://script.google.com/macros/s/AKfycbxkLkjA6d2Kjj5dGF0XbZydJCa4Y4KFkCSCEIS8PqdN7l9G4gRWunGGrd5A4HeKq3dP/exec';
+    // 드라이브 파일 ID -> 저장소 내 이미지 경로(빌드가 채운다). 비공개 드라이브 파일의 직링크는 로그인 창으로 넘어가 이미지가 안 보이고 느리다.
+    const LOCAL_IMAGE_MAP = {"1N31faywgz2zYK5eI9TsY3ULIVqWpE5vY":"../regions/1.png","1Em5eqzJCSatXqoz2Z1CDbi1XRlzJqlZI":"../regions/2.png","1tM3Xkt0WBSqKF6Q-mNhsFUXFU-QnQkFS":"../regions/3.png","1g8M4J3irzZZ643FCuOFycBL2kYZYZTQl":"../regions/4.png","16ufd8Jyww0HU3Qp2-WGOKAMNX2d_MBWO":"../regions/5.png","1K4xsqCdG96RUE6upt0GwwzReO2lbzwJ6":"../regions/6.png","1cbUvJx02PCnktpiU9YQ2IsGXU2B7mVW6":"../regions/7.png","1_ETOtmWJilULFkmbzrtSkpQypOM0rxdm":"../regions/8.png","1wVL_mRKTV-ZFwrWD6XBIaYnwFhtXmJWR":"../regions/9.png","1BW651-VqDBApyP3RKqNem1p1CKNiVL_r":"../regions/10.png","1NZdG1assX3SOQPuF2xneSgF8UU8MyLAI":"../regions/11.png","1gQ_ovfGo5ngaMbpHbJqqRjxsyy9EYoo3":"../regions/12.png","1uiOcoE5YZYL9B4JxKEffi28pN6AnUoKn":"../regions/13.png","1WelF5pySaht6RngmY38hLZmi9b42u0H1":"../regions/14.png","1fDEGF2X2HR7uewcfwpdU7xd0pZYZtcQz":"../regions/15.png","1kg6ailColQzv5YXfa3T76aIBDHInoUHQ":"../regions/16.png","1gZrSgwNexUW229dJuk59ne9XoJVSD0Kl":"../regions/17.png","10V2u1qBflL1mCs0T_6LQZzvii8x_-p0_":"../favicon.png","1uFE69Tj24eEIw152xfXHGmDAYFu412Ro":"../ci-full.png"};
+    function localImageUrl_(url) {
+      const m = String(url || '').match(/(?:lh3\.googleusercontent\.com\/d\/|drive\.google\.com\/file\/d\/|[?&]id=)([a-zA-Z0-9_-]+)/i);
+      return (m && LOCAL_IMAGE_MAP[m[1]]) || '';
+    }
     const REGION_SLUGS = { '서울': 'seoul', '부산': 'busan', '대구': 'daegu', '인천': 'incheon', '광주': 'gwangju', '대전': 'daejeon', '울산': 'ulsan', '세종': 'sejong', '경기': 'gyeonggi', '강원': 'gangwon', '충북': 'chungbuk', '충남': 'chungnam', '전북': 'jeonbuk', '전남': 'jeonnam', '경북': 'gyeongbuk', '경남': 'gyeongnam', '제주': 'jeju' };
     (function initAdminAccessLink_() {
       if (!ADMIN_URL) return;
@@ -7213,6 +7219,8 @@
     function toDriveImageUrl(url) {
       const raw = (url || '').trim();
       if (!raw) return '';
+      const local = localImageUrl_(raw);
+      if (local) return local;
       if (/lh3\.googleusercontent\.com\/d\//i.test(raw)) return raw; // 이미 직링크
       let match = raw.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/i);
       if (!match) match = raw.match(/[?&]id=([a-zA-Z0-9_-]+)/i);
@@ -9208,7 +9216,7 @@
         const label = esc(item.associationName);
         const textBtn = `<span class="block w-full text-sm font-bold text-slate-800 leading-snug break-keep p-3">${label}</span>`;
         const inner = item.imageUrl
-          ? `<img src="${esc(item.imageUrl)}" alt="${label}" loading="lazy" class="block h-auto object-contain" style="width:97.7%;margin-right:2.3%" onerror="this.outerHTML=this.parentNode.dataset.fallback" />`
+          ? `<img src="${esc(localImageUrl_(item.imageUrl) || item.imageUrl)}" alt="${label}" loading="lazy" class="block h-auto object-contain" style="width:97.7%;margin-right:2.3%" onerror="this.outerHTML=this.parentNode.dataset.fallback" />`
           : textBtn;
         return `
         <button type="button" onclick="navigateToRegion('${item.region}')" title="${label}" aria-label="${label}" data-fallback="${esc(textBtn)}"
