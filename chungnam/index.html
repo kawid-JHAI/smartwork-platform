@@ -3748,18 +3748,24 @@
       if (sMsg) sMsg.textContent = loaderSteps[loaderStepIdx];
     }, 2200);
 
-    const progressInterval = setInterval(() => {
-      if (loaderProgress < 90) {
-        loaderProgress += Math.random() * 18 + 5;
-        if (loaderProgress > 90) loaderProgress = 90;
-        if (pBar) pBar.style.width = loaderProgress + '%';
-      }
-    }, 120);
+    // 게이지: 프레임마다 시간 기준으로 부드럽게 차오른다(처음엔 빠르게, 90%에 가까워질수록 천천히 - 끊기는 계단 없이 연속)
+    const loaderT0 = performance.now();
+    let progressRaf = 0;
+    if (pBar) pBar.style.transition = 'none';
+    function tickLoaderProgress_(now) {
+      loaderProgress = 90 * (1 - Math.exp(-(now - loaderT0) / 2200));
+      if (pBar) pBar.style.width = loaderProgress.toFixed(2) + '%';
+      progressRaf = requestAnimationFrame(tickLoaderProgress_);
+    }
+    progressRaf = requestAnimationFrame(tickLoaderProgress_);
 
     function completeAppLoader() {
-      clearInterval(progressInterval);
+      cancelAnimationFrame(progressRaf);
       clearInterval(statusInterval);
-      if (pBar) pBar.style.width = '100%';
+      if (pBar) {
+        pBar.style.transition = 'width 0.3s ease-out'; // 현재 위치에서 끝까지 매끄럽게 채운다
+        pBar.style.width = '100%';
+      }
       if (sMsg) sMsg.textContent = '동기화 완료!';
       setTimeout(() => {
         if (introEl) {
