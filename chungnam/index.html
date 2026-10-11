@@ -3579,7 +3579,7 @@
       const link = document.getElementById('adminAccessLink');
       const row = document.getElementById('adminAccessRow');
       if (!link || !row) return;
-      link.href = ADMIN_URL + '?region=' + encodeURIComponent(CURRENT_REGION);
+      link.href = ADMIN_URL + '?region=' + encodeURIComponent(CURRENT_REGION) + '&admin=1';
       row.classList.remove('hidden');
     })();
 
