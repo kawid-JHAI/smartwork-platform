@@ -3811,10 +3811,12 @@
       if (myInfoBtn) myInfoBtn.classList.toggle('hidden', !isMember);
       const adminSettingsBtn = document.getElementById('btnAdminSettings');
       if (adminSettingsBtn) adminSettingsBtn.classList.toggle('hidden', isMember);
+      try { if (window.PushUI) window.PushUI.onLogin(isMember); } catch (e) { } // 알림 설정 버튼(GitHub 화면 전용 모듈)
     }
 
     function clearGreeting() {
       try { resetMsgState_(); } catch (e) { }
+      try { if (window.PushUI) window.PushUI.onLogout(); } catch (e) { }
       const loginBtn = document.getElementById('btnHeaderLogin');
       if (loginBtn) loginBtn.classList.remove('hidden');
       const logoutBtn = document.getElementById('btnMemberLogout');
@@ -4122,7 +4124,25 @@
       return !!(MEMBER_SESSION && normRegion_(MEMBER_SESSION.region) === normRegion_(CURRENT_REGION));
     }
 
-    function finishAuthCheck_() { AUTH_READY = true; loadLockedData_(); refreshMsgBadge_(); }
+    /** 알림을 눌러 들어온 경우(?open=notice|training|gallery|news|msg) 해당 메뉴를 한 번만 열어 준다 */
+    let OPEN_PARAM_DONE_ = false;
+    function handleOpenParam_() {
+      if (OPEN_PARAM_DONE_) return;
+      let target = '';
+      try { target = new URLSearchParams(location.search).get('open') || ''; } catch (e) { return; }
+      if (!target) return;
+      OPEN_PARAM_DONE_ = true;
+      const sections = { notice: 'notices', training: 'training', gallery: 'gallery' };
+      setTimeout(() => {
+        try {
+          if (sections[target]) activateSection(sections[target], true);
+          else if (target === 'news') openNewsListModal();
+          else if (target === 'msg' && isMsgRecipient_()) openMsgDrawer();
+        } catch (e) { }
+      }, target === 'msg' ? 1800 : 600); // 쪽지는 관리자 판정이 끝난 뒤에 열어야 한다
+    }
+
+    function finishAuthCheck_() { AUTH_READY = true; loadLockedData_(); refreshMsgBadge_(); handleOpenParam_(); }
 
     /** 비로그인 상태로 확정: 로그인 버튼을 보이고 둘러보기 화면을 연다 */
     function enterGuestMode_() {
@@ -4131,6 +4151,7 @@
       AUTH_READY = true;
       loadLockedData_();
       refreshMsgBadge_();
+      handleOpenParam_();
     }
 
     function openLoginGate() {
