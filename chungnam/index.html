@@ -2169,6 +2169,13 @@
             <input type="tel" id="signupPhone" required placeholder="010-0000-0000"
               class="w-full border border-border-subtle rounded-none px-3 py-3 text-base focus:outline-none focus:border-secondary" />
           </div>
+          <!-- 개인정보 동의(필수 2종): 문구는 서버(getConsentTexts)가 내려주며, 동의 시각과 문구 지문이 서버에 기록된다 -->
+          <div class="flex flex-col gap-2 border border-border-subtle p-3 bg-slate-50">
+            <p class="text-xs font-bold text-slate-700">개인정보 동의 <span class="text-red-600 font-semibold">(필수)</span></p>
+            <div id="signupConsentList" class="flex flex-col gap-2">
+              <p class="text-[11px] text-slate-400">동의서를 불러오는 중입니다...</p>
+            </div>
+          </div>
           <p id="signupErrorMsg" class="text-xs text-status-danger hidden"></p>
           <button id="btnMemberSignup" type="submit"
             class="w-full py-3 rounded-none bg-secondary hover:bg-blue-700 text-white font-semibold text-base transition-colors shadow-sm">가입
@@ -3779,6 +3786,64 @@
         if (!el) return;
         el.classList.toggle('hidden', v !== view);
       });
+      if (view === 'signup') loadSignupConsent_();
+    }
+
+    // ── 회원가입 개인정보 동의 ──
+    let SIGNUP_CONSENT = { version: '', items: [], loaded: false };
+
+    function loadSignupConsent_() {
+      const box = document.getElementById('signupConsentList');
+      if (!box || SIGNUP_CONSENT.loaded) return;
+      google.script.run
+        .withSuccessHandler(res => {
+          if (!res || !res.success || !res.items || !res.items.length) {
+            box.innerHTML = '<p class="text-[11px] text-red-600">동의서를 불러오지 못했습니다. 화면을 새로고침해 주세요.</p>';
+            return;
+          }
+          SIGNUP_CONSENT = { version: res.version, items: res.items, loaded: true };
+          const esc = (s) => escapeHtml(String(s || ''));
+          box.innerHTML =
+            '<label class="flex items-center gap-2 pb-2 border-b border-slate-200 cursor-pointer">' +
+            '<input type="checkbox" id="consentAll" class="w-4 h-4" onchange="toggleAllConsent_(this.checked)" />' +
+            '<span class="text-sm font-bold text-slate-800">아래 필수 항목에 모두 동의합니다</span></label>' +
+            res.items.map(it =>
+              '<div>' +
+              '<label class="flex items-center gap-2 cursor-pointer">' +
+              '<input type="checkbox" data-consent="' + esc(it.key) + '" class="w-4 h-4" onchange="syncConsentAll_()" />' +
+              '<span class="text-[13px] font-semibold text-slate-700">' + esc(it.title) + '</span></label>' +
+              '<details class="mt-1 ml-6"><summary class="text-[11px] text-secondary cursor-pointer">내용 보기</summary>' +
+              '<div class="mt-1 p-2 bg-white border border-slate-200 text-[11px] text-slate-600 leading-relaxed whitespace-pre-line">' + esc(it.body) + '</div></details>' +
+              '</div>'
+            ).join('');
+        })
+        .withFailureHandler(() => {
+          box.innerHTML = '<p class="text-[11px] text-red-600">동의서를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.</p>';
+        })
+        .getConsentTexts(CURRENT_REGION);
+    }
+
+    function toggleAllConsent_(checked) {
+      document.querySelectorAll('#signupConsentList input[data-consent]').forEach(c => { c.checked = checked; });
+    }
+
+    function syncConsentAll_() {
+      const all = document.getElementById('consentAll');
+      const items = Array.from(document.querySelectorAll('#signupConsentList input[data-consent]'));
+      if (all) all.checked = items.length > 0 && items.every(c => c.checked);
+    }
+
+    /** 체크 상태를 모아 서버에 보낼 형태로 만든다. 필수 항목이 하나라도 빠지면 null */
+    function collectConsent_() {
+      if (!SIGNUP_CONSENT.loaded) return null;
+      const out = { version: SIGNUP_CONSENT.version, userAgent: (navigator.userAgent || '').slice(0, 300) };
+      let ok = true;
+      SIGNUP_CONSENT.items.forEach(it => {
+        const el = document.querySelector('#signupConsentList input[data-consent="' + it.key + '"]');
+        out[it.key] = !!(el && el.checked);
+        if (!out[it.key]) ok = false;
+      });
+      return ok ? out : null;
     }
 
     function openAuthGate() {
@@ -4275,6 +4340,15 @@
         return;
       }
 
+      const consent = collectConsent_();
+      if (!consent) {
+        errEl.textContent = SIGNUP_CONSENT.loaded
+          ? '필수 개인정보 동의 항목(수집·이용, 제3자 제공)에 모두 동의해야 가입할 수 있습니다.'
+          : '동의서를 불러오는 중입니다. 잠시 후 다시 시도해 주세요.';
+        errEl.classList.remove('hidden');
+        return;
+      }
+
       setBtnLoading(btn, '신청 중...');
 
       const formData = {
@@ -4283,7 +4357,8 @@
         name: document.getElementById('signupName').value.trim(),
         position: document.getElementById('signupPosition').value.trim(),
         facilityName: document.getElementById('signupFacility').value.trim(),
-        phone: document.getElementById('signupPhone').value.trim()
+        phone: document.getElementById('signupPhone').value.trim(),
+        consent: consent
       };
 
       google.script.run
@@ -5419,11 +5494,11 @@
           </div>
           <div>
             <p class="font-bold text-slate-800 mb-1">3. 보유 및 이용 기간</p>
-            <p>회원 탈퇴 시 또는 이용 목적 달성 시까지 보유하며, 관계 법령에 따라 별도 보존이 필요한 경우 해당 기간 동안 보존합니다.</p>
+            <p>회원 탈퇴 후 3년이 경과한 때까지 보관하며, 기간이 지나면 지체 없이 파기합니다. 관계 법령에 따라 별도 보존이 필요한 경우 해당 기간 동안 보존합니다.</p>
           </div>
           <div>
             <p class="font-bold text-slate-800 mb-1">4. 개인정보의 제3자 제공</p>
-            <p>이용자의 동의 또는 법령에 근거가 있는 경우를 제외하고 개인정보를 외부에 제공하지 않습니다.</p>
+            <p>회원 가입 시 이용자가 동의한 경우에 한해 한국장애인복지시설협회 중앙협회에 성명, 소속시설명, 직급, 연락처, 이메일을 제공합니다(목적: 전국 회원 현황 관리 및 중앙협회의 공지·교육·사업·행사 안내). 그 밖에는 이용자의 동의 또는 법령에 근거가 있는 경우를 제외하고 개인정보를 외부에 제공하지 않습니다.</p>
           </div>
           <div>
             <p class="font-bold text-slate-800 mb-1">5. 개인정보의 안전성 확보 조치</p>
