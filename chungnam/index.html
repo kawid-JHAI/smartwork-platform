@@ -9903,7 +9903,7 @@
           MASCOT.loaded++;
           if (MASCOT.loaded === MASCOT_FRAME_IDS.length) { MASCOT.ready = true; setTimeout(mascotEvaluate_, 300); } // 준비되면 곧바로 새 소식이 있는지 확인
         };
-        const url = 'https://lh3.googleusercontent.com/d/' + id;
+        const url = '../mascot/' + (i + 1) + '.png';
         let retried = false;
         img.onerror = () => {
           if (!retried) { retried = true; setTimeout(() => { img.src = url + '?r=' + Date.now(); }, 1500); return; }
