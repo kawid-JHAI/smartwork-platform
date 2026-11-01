@@ -2104,14 +2104,18 @@
         <form id="loginForm" onsubmit="handleMemberLogin(event)" class="flex flex-col gap-3">
           <div>
             <label class="text-xs text-slate-500 font-semibold block mb-1">이메일</label>
-            <input type="email" id="loginEmail" required placeholder="example@email.com"
+            <input type="email" id="loginEmail" name="email" autocomplete="username" autocapitalize="none" spellcheck="false" required placeholder="example@email.com"
               class="w-full border border-border-subtle rounded-none px-3 py-3 text-base focus:outline-none focus:border-secondary" />
           </div>
           <div>
             <label class="text-xs text-slate-500 font-semibold block mb-1">비밀번호</label>
-            <input type="password" id="loginPassword" required placeholder="비밀번호"
+            <input type="password" id="loginPassword" name="password" autocomplete="current-password" required placeholder="비밀번호"
               class="w-full border border-border-subtle rounded-none px-3 py-3 text-base focus:outline-none focus:border-secondary" />
           </div>
+          <label class="flex items-center gap-2 text-xs text-slate-500 select-none cursor-pointer">
+            <input type="checkbox" id="loginRememberEmail" checked class="w-4 h-4 accent-blue-700" />
+            아이디(이메일) 기억하기
+          </label>
           <p id="loginErrorMsg" class="text-xs text-status-danger hidden"></p>
           <button id="btnMemberLogin" type="submit"
             class="w-full py-3 rounded-none bg-secondary hover:bg-blue-700 text-white font-semibold text-base transition-colors shadow-sm">로그인</button>
@@ -2135,17 +2139,17 @@
         <form id="signupForm" onsubmit="handleMemberSignup(event)" class="flex flex-col gap-3">
           <div>
             <label class="text-xs text-slate-500 font-semibold block mb-1">이메일 (아이디)</label>
-            <input type="email" id="signupEmail" required placeholder="example@email.com"
+            <input type="email" id="signupEmail" name="email" autocomplete="email" autocapitalize="none" spellcheck="false" required placeholder="example@email.com"
               class="w-full border border-border-subtle rounded-none px-3 py-3 text-base focus:outline-none focus:border-secondary" />
           </div>
           <div>
             <label class="text-xs text-slate-500 font-semibold block mb-1">비밀번호 (6자 이상)</label>
-            <input type="password" id="signupPassword" required minlength="6" placeholder="비밀번호"
+            <input type="password" id="signupPassword" name="new-password" autocomplete="new-password" required minlength="6" placeholder="비밀번호"
               class="w-full border border-border-subtle rounded-none px-3 py-3 text-base focus:outline-none focus:border-secondary" />
           </div>
           <div>
             <label class="text-xs text-slate-500 font-semibold block mb-1">비밀번호 확인</label>
-            <input type="password" id="signupPassword2" required minlength="6" placeholder="비밀번호 확인"
+            <input type="password" id="signupPassword2" name="new-password-confirm" autocomplete="new-password" required minlength="6" placeholder="비밀번호 확인"
               class="w-full border border-border-subtle rounded-none px-3 py-3 text-base focus:outline-none focus:border-secondary" />
           </div>
           <div>
@@ -2161,12 +2165,12 @@
           </div>
           <div>
             <label class="text-xs text-slate-500 font-semibold block mb-1">성명</label>
-            <input type="text" id="signupName" required placeholder="홍길동"
+            <input type="text" id="signupName" autocomplete="name" required placeholder="홍길동"
               class="w-full border border-border-subtle rounded-none px-3 py-3 text-base focus:outline-none focus:border-secondary" />
           </div>
           <div>
             <label class="text-xs text-slate-500 font-semibold block mb-1">연락처</label>
-            <input type="tel" id="signupPhone" required placeholder="010-0000-0000"
+            <input type="tel" id="signupPhone" autocomplete="tel" required placeholder="010-0000-0000"
               class="w-full border border-border-subtle rounded-none px-3 py-3 text-base focus:outline-none focus:border-secondary" />
           </div>
           <!-- 개인정보 동의(필수 2종): 문구는 서버(getConsentTexts)가 내려주며, 동의 시각과 문구 지문이 서버에 기록된다 -->
@@ -2214,7 +2218,7 @@
         <form id="forgotForm" onsubmit="handleForgotPassword(event)" class="flex flex-col gap-3">
           <div>
             <label class="text-xs text-slate-500 font-semibold block mb-1">이메일</label>
-            <input type="email" id="forgotEmail" required placeholder="example@email.com"
+            <input type="email" id="forgotEmail" autocomplete="email" autocapitalize="none" spellcheck="false" required placeholder="example@email.com"
               class="w-full border border-border-subtle rounded-none px-3 py-3 text-base focus:outline-none focus:border-secondary" />
           </div>
           <p id="forgotMsg" class="text-xs text-slate-500 hidden"></p>
@@ -2232,12 +2236,12 @@
         <form id="resetForm" onsubmit="handleResetPassword(event)" class="flex flex-col gap-3">
           <div>
             <label class="text-xs text-slate-500 font-semibold block mb-1">새 비밀번호 (6자 이상)</label>
-            <input type="password" id="resetPassword1" required minlength="6" placeholder="새 비밀번호"
+            <input type="password" id="resetPassword1" autocomplete="new-password" required minlength="6" placeholder="새 비밀번호"
               class="w-full border border-border-subtle rounded-none px-3 py-3 text-base focus:outline-none focus:border-secondary" />
           </div>
           <div>
             <label class="text-xs text-slate-500 font-semibold block mb-1">새 비밀번호 확인</label>
-            <input type="password" id="resetPassword2" required minlength="6" placeholder="새 비밀번호 확인"
+            <input type="password" id="resetPassword2" autocomplete="new-password" required minlength="6" placeholder="새 비밀번호 확인"
               class="w-full border border-border-subtle rounded-none px-3 py-3 text-base focus:outline-none focus:border-secondary" />
           </div>
           <p id="resetErrorMsg" class="text-xs text-status-danger hidden"></p>
@@ -2495,7 +2499,7 @@
         </div>
         <div>
           <label class="text-[11px] text-slate-500 font-semibold block mb-1">비밀번호</label>
-          <input type="password" id="myInfoGatePassword" placeholder="현재 비밀번호"
+          <input type="password" id="myInfoGatePassword" autocomplete="current-password" placeholder="현재 비밀번호"
             onkeydown="if(event.key==='Enter'){event.preventDefault();handleMyInfoGateSubmit();}"
             class="w-full border border-border-subtle px-3 py-2.5 text-sm focus:outline-none focus:border-secondary" />
         </div>
@@ -2561,13 +2565,13 @@
             </div>
             <div>
               <label class="text-[11px] text-slate-500 font-semibold block mb-1">새 비밀번호</label>
-              <input type="password" id="myNewPassword" placeholder="6자 이상 (변경 시에만 입력)"
+              <input type="password" id="myNewPassword" autocomplete="new-password" placeholder="6자 이상 (변경 시에만 입력)"
                 oninput="checkMyInfoDirty()"
                 class="w-full border border-border-subtle px-3 py-2.5 text-sm focus:outline-none focus:border-secondary" />
             </div>
             <div>
               <label class="text-[11px] text-slate-500 font-semibold block mb-1">새 비밀번호 확인</label>
-              <input type="password" id="myNewPasswordConfirm" placeholder="다시 입력"
+              <input type="password" id="myNewPasswordConfirm" autocomplete="new-password" placeholder="다시 입력"
                 oninput="checkMyInfoDirty()"
                 class="w-full border border-border-subtle px-3 py-2.5 text-sm focus:outline-none focus:border-secondary" />
             </div>
@@ -3787,6 +3791,26 @@
         el.classList.toggle('hidden', v !== view);
       });
       if (view === 'signup') loadSignupConsent_();
+      if (view === 'login') prefillLoginEmail_();
+    }
+
+    // ── 아이디(이메일) 기억하기 ──
+    // 이메일은 비밀이 아니라 기기에 저장해 두었다가 다음 로그인 때 채운다. 비밀번호는 저장하지 않는다(휴대폰·브라우저의 비밀번호 관리자가 맡는다).
+    const LAST_EMAIL_KEY = 'kawid_last_email', LAST_EMAIL_OFF_KEY = 'kawid_last_email_off';
+    function prefillLoginEmail_() {
+      try {
+        const el = document.getElementById('loginEmail'), cb = document.getElementById('loginRememberEmail');
+        const off = localStorage.getItem(LAST_EMAIL_OFF_KEY) === '1';
+        if (cb) cb.checked = !off;
+        const saved = localStorage.getItem(LAST_EMAIL_KEY);
+        if (el && saved && !off && !el.value) el.value = saved;
+      } catch (e) { }
+    }
+    function saveLoginEmail_(email, remember) {
+      try {
+        if (remember) { localStorage.setItem(LAST_EMAIL_KEY, email); localStorage.removeItem(LAST_EMAIL_OFF_KEY); }
+        else { localStorage.removeItem(LAST_EMAIL_KEY); localStorage.setItem(LAST_EMAIL_OFF_KEY, '1'); }
+      } catch (e) { }
     }
 
     // ── 회원가입 개인정보 동의 ──
@@ -3948,13 +3972,17 @@
     // ========================================================
     // 쪽지함 (중앙협회 ↔ 이 협회 관리자). 관리자 누구든 읽으면 그 대화는 읽음 처리된다.
     // ========================================================
-    const MSG = { count: null, loaded: false, allowed: false, threads: [], cur: null, files: [], busy: false, timer: 0 };
+    const MSG = { count: null, loaded: false, allowed: false, deniedKey: '', threads: [], cur: null, files: [], busy: false, timer: 0 };
     const msgEsc_ = v => String(v == null ? '' : v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
     /** 쪽지를 받을 수 있는지: 서버가 "이 협회 관리자"로 확인해 준 경우(사용자권한관리 등록 구글 계정, 또는 그 이메일로 회원 로그인한 경우) */
     function isMsgRecipient_() { return MSG.allowed === true; }
     /** 관리자일 가능성이 있어 서버에 물어볼 만한 상태인지(구글 통과 관리자 또는 이 협회 회원 로그인). 중앙 직원·비로그인·다른 협회는 묻지 않는다 */
     function msgMaybe_() { return !!((STAFF_SESSION && !STAFF_SESSION.hq) || (!STAFF_SESSION && MEMBER_SESSION && normRegion_(MEMBER_SESSION.region) === normRegion_(CURRENT_REGION))); }
+    /** 지금 로그인을 구분하는 값(회원은 로그인 토큰, 관리자는 'staff'). 서버가 쪽지함을 거절한 로그인인지 기억하는 데 쓴다 */
+    function msgIdentityKey_() { return (MEMBER_SESSION && MEMBER_SESSION.token) || (STAFF_SESSION ? 'staff' : ''); }
+    /** 3분마다 도는 쪽지 도착 확인: 숨은 탭에서는 쉬고, 관리자가 아니라고 거절당한 로그인에서는 다시 묻지 않는다 */
+    function msgPollTick_() { if (!document.hidden && msgMaybe_() && MSG.deniedKey !== msgIdentityKey_()) refreshMsgBadge_(); }
 
     function updateMsgButton_() {
       const btn = document.getElementById('btnMsgInbox');
@@ -3976,11 +4004,14 @@
           MSG.loaded = true;
           if (res && res.success) {
             MSG.allowed = true;
+            MSG.deniedKey = '';
             MSG.count = res.count || 0;
             updateMsgButton_();
             if (prev !== null && MSG.count > prev) notifyNewMsg_();
           } else {
             MSG.allowed = false; MSG.count = 0; updateMsgButton_(); // 관리자가 아니면 서버가 거부 → 쪽지 아이콘을 보이지 않는다
+            // "관리자만 이용" 거절이면 이 로그인에서는 3분마다 다시 묻지 않는다(관리자가 아닌 회원이 계속 서버를 부르던 것을 없앰). 일시적 오류는 계속 재시도
+            if (res && /관리자만/.test(String(res.error || ''))) MSG.deniedKey = msgIdentityKey_();
           }
         })
         .withFailureHandler(() => { MSG.loaded = true; })
@@ -3988,7 +4019,7 @@
     }
 
     /** 로그아웃·세션 만료·비로그인 확정 시 쪽지 상태 초기화 */
-    function resetMsgState_() { MSG.allowed = false; MSG.count = null; MSG.loaded = false; try { updateMsgButton_(); } catch (e) { } }
+    function resetMsgState_() { MSG.allowed = false; MSG.deniedKey = ''; MSG.count = null; MSG.loaded = false; try { updateMsgButton_(); } catch (e) { } }
 
     function msgNoticeMessage_() {
       return { text: '중앙협회에서 온 쪽지가 ' + MSG.count + '통 있어요. 읽기 전까지 접속할 때마다 알려드릴게요.', cta: '쪽지 보기', action: () => openMsgDrawer(), kind: 'msg' };
@@ -4307,6 +4338,7 @@
           restoreBtnLoading(btn);
           if (res && res.success) {
             try { localStorage.setItem(MEMBER_TOKEN_KEY, res.token); } catch (e) { }
+            { const rb = document.getElementById('loginRememberEmail'); saveLoginEmail_(email, !rb || rb.checked); }
             MEMBER_SESSION = { token: res.token, name: res.name, position: res.position, facilityName: res.facilityName, phone: res.phone, email: email, region: CURRENT_REGION };
             applyGreeting(res.name, res.position, true);
             closeAuthGate();
@@ -5155,6 +5187,39 @@
     let NEWS_BRIEFING_META = null; // { key: 날짜|시간대, slot } - 브리핑 메타가 도착하면 채워짐(음성 다운로드 완료와 무관). 캐릭터가 "새 브리핑" 여부를 판단
     let NEWS_BRIEFING_AUTOPLAY = false; // 음성 준비 전에 캐릭터 말풍선의 "듣기"를 눌렀으면, 준비되는 즉시 재생
 
+    // ── 브리핑 오디오 기기 저장 ──
+    // 브리핑 오디오(수 MB)는 하루에 한 번만 바뀐다. 한 번 받으면 기기(IndexedDB)에 최신 1개만 저장해 두고, 같은 날 다시 열면 서버에서 받지 않는다.
+    // 저장소를 쓸 수 없는 환경에서는 예전처럼 서버에서 받는다.
+    const BRIEF_DB_NAME = 'kawid_brief_v1', BRIEF_STORE = 'audio';
+    function briefDbOpen_() {
+      return new Promise((resolve, reject) => {
+        try {
+          const req = indexedDB.open(BRIEF_DB_NAME, 1);
+          req.onupgradeneeded = () => { req.result.createObjectStore(BRIEF_STORE); };
+          req.onsuccess = () => resolve(req.result);
+          req.onerror = () => reject(req.error);
+          req.onblocked = () => reject(new Error('blocked'));
+        } catch (e) { reject(e); }
+      });
+    }
+    /** 저장된 오디오가 요청한 오디오ID와 같을 때만 data URL을 돌려준다(없거나 다르면 null) */
+    function briefAudioGet_(audioId) {
+      return briefDbOpen_().then(db => new Promise((resolve, reject) => {
+        const r = db.transaction(BRIEF_STORE, 'readonly').objectStore(BRIEF_STORE).get('latest');
+        r.onsuccess = () => { db.close(); const v = r.result; resolve(v && v.id === audioId && typeof v.dataUrl === 'string' && v.dataUrl.indexOf('data:') === 0 ? v.dataUrl : null); };
+        r.onerror = () => { db.close(); reject(r.error); };
+      })).catch(() => null);
+    }
+    function briefAudioPut_(audioId, dataUrl) {
+      return briefDbOpen_().then(db => new Promise(resolve => {
+        const tx = db.transaction(BRIEF_STORE, 'readwrite');
+        tx.objectStore(BRIEF_STORE).put({ id: audioId, dataUrl: dataUrl, savedAt: Date.now() }, 'latest'); // 같은 키라 이전 오디오는 덮어써진다(최신 1개만 보관)
+        tx.oncomplete = () => { db.close(); resolve(true); };
+        tx.onerror = () => { db.close(); resolve(false); };
+        tx.onabort = () => { db.close(); resolve(false); };
+      })).catch(() => false);
+    }
+
     /** 앱 로딩 시퀀스에서 호출 - 오늘자 브리핑 오디오를 미리 Base64로 받아 <audio>에 세팅만 해두고
      *  재생은 하지 않는다(사용자가 재생 버튼을 눌러야 시작 - 브라우저 자동재생 차단 정책과
      *  무관하게 항상 확실히 동작하고, 방문 즉시 소리가 나는 불쾌한 UX도 피할 수 있음).
@@ -5180,28 +5245,36 @@
             NEWS_BRIEFING_META = { key: (res.date || '') + '|' + slotNow, slot: slotNow };
             mascotOnData_('briefing'); // 메타가 오는 즉시 캐릭터가 판단(큰 음성 파일을 기다리지 않는다)
             if (res.audioId === NEWS_BRIEFING_AUDIO_ID) return; // 변화 없음 - 큰 오디오를 다시 받지 않는다
-            google.script.run
-              .withSuccessHandler(audioRes => {
-                if (audioRes && audioRes.success && audioRes.dataUrl) {
-                  const audioEl = document.getElementById('newsBriefingAudioEl');
-                  if (isRefresh && audioEl && !audioEl.paused) return; // 그 사이 재생을 시작했다면 끊지 않는다
-                  audioEl.src = audioRes.dataUrl;
-                  NEWS_BRIEFING_READY = true;
-                  NEWS_BRIEFING_SLOT = res.slot || '아침';
-                  NEWS_BRIEFING_AUDIO_ID = res.audioId;
-                  statusEl.textContent = NEWS_BRIEFING_TITLES[NEWS_BRIEFING_SLOT] || '오늘의 뉴스 요약 브리핑';
-                  if (barsEl) barsEl.classList.remove('opacity-40');
-                  if (playBtn) playBtn.disabled = false;
-                  if (NEWS_BRIEFING_AUTOPLAY) { // 캐릭터 안내에서 "듣기"를 눌러 둔 상태 → 준비되자마자 재생
-                    NEWS_BRIEFING_AUTOPLAY = false;
-                    audioEl.play().catch(() => { });
+            // 같은 오디오가 기기에 저장되어 있으면(같은 날 재방문) 큰 오디오를 서버에서 다시 받지 않는다
+            const applyAudio_ = (dataUrl) => {
+              const audioEl = document.getElementById('newsBriefingAudioEl');
+              if (isRefresh && audioEl && !audioEl.paused) return; // 그 사이 재생을 시작했다면 끊지 않는다
+              audioEl.src = dataUrl;
+              NEWS_BRIEFING_READY = true;
+              NEWS_BRIEFING_SLOT = res.slot || '아침';
+              NEWS_BRIEFING_AUDIO_ID = res.audioId;
+              statusEl.textContent = NEWS_BRIEFING_TITLES[NEWS_BRIEFING_SLOT] || '오늘의 뉴스 요약 브리핑';
+              if (barsEl) barsEl.classList.remove('opacity-40');
+              if (playBtn) playBtn.disabled = false;
+              if (NEWS_BRIEFING_AUTOPLAY) { // 캐릭터 안내에서 "듣기"를 눌러 둔 상태 → 준비되자마자 재생
+                NEWS_BRIEFING_AUTOPLAY = false;
+                audioEl.play().catch(() => { });
+              }
+            };
+            briefAudioGet_(res.audioId).then(cached => {
+              if (cached) { applyAudio_(cached); return; }
+              google.script.run
+                .withSuccessHandler(audioRes => {
+                  if (audioRes && audioRes.success && audioRes.dataUrl) {
+                    applyAudio_(audioRes.dataUrl);
+                    briefAudioPut_(res.audioId, audioRes.dataUrl);
+                  } else {
+                    fail('브리핑 음성을 불러오지 못했습니다.');
                   }
-                } else {
-                  fail('브리핑 음성을 불러오지 못했습니다.');
-                }
-              })
-              .withFailureHandler(() => fail('브리핑 음성을 불러오지 못했습니다.'))
-              .getNewsBriefingAudioDataUrl(res.audioId);
+                })
+                .withFailureHandler(() => fail('브리핑 음성을 불러오지 못했습니다.'))
+                .getNewsBriefingAudioDataUrl(res.audioId);
+            });
           } else {
             fail('아직 오늘의 브리핑이 없습니다 (매일 아침 7시 자동 생성)');
           }
@@ -8867,23 +8940,66 @@
       } catch (e) {}
     }
 
-    /** 마스터 시트 '효과' 탭에 등록된 전체 효과음을 페이지 로드 시 일괄 프리페치 & 사전 디코딩 */
+    // ── 효과음 기기 저장 ──
+    // 효과음(MP3 여러 개)은 크기가 커서 매번 서버에서 받으면 서버 실행 1개와 큰 전송이 따라붙는다. 한 번 받으면 기기(IndexedDB)에 저장해 두고
+    // 다음 방문부터는 저장본을 바로 쓴다. 최근(6시간 안)에 확인했으면 서버를 부르지 않고, 그 뒤에는 "버전"만 물어 바뀌었을 때만 새로 받는다.
+    // 저장소를 쓸 수 없는 환경(사생활 보호 모드 등)에서는 예전처럼 매번 받는다.
+    const SFX_DB_NAME = 'kawid_sfx_v1', SFX_STORE = 'cache', SFX_REVALIDATE_MS = 6 * 60 * 60 * 1000;
+    function sfxDbOpen_() {
+      return new Promise((resolve, reject) => {
+        try {
+          const req = indexedDB.open(SFX_DB_NAME, 1);
+          req.onupgradeneeded = () => { req.result.createObjectStore(SFX_STORE); };
+          req.onsuccess = () => resolve(req.result);
+          req.onerror = () => reject(req.error);
+          req.onblocked = () => reject(new Error('blocked'));
+        } catch (e) { reject(e); }
+      });
+    }
+    function sfxCacheGet_() {
+      return sfxDbOpen_().then(db => new Promise((resolve, reject) => {
+        const r = db.transaction(SFX_STORE, 'readonly').objectStore(SFX_STORE).get('all');
+        r.onsuccess = () => { db.close(); resolve(r.result || null); };
+        r.onerror = () => { db.close(); reject(r.error); };
+      })).catch(() => null);
+    }
+    function sfxCachePut_(rec) {
+      return sfxDbOpen_().then(db => new Promise(resolve => {
+        const tx = db.transaction(SFX_STORE, 'readwrite');
+        tx.objectStore(SFX_STORE).put(rec, 'all');
+        tx.oncomplete = () => { db.close(); resolve(true); };
+        tx.onerror = () => { db.close(); resolve(false); };
+        tx.onabort = () => { db.close(); resolve(false); };
+      })).catch(() => false);
+    }
+    function applySoundEffects_(sounds) {
+      Object.assign(SOUND_EFFECTS_CACHE, sounds);
+      if (SOUND_EFFECTS_CACHE['제미나이버튼클릭']) {
+        GEMINI_CLICK_SOUND_URL = SOUND_EFFECTS_CACHE['제미나이버튼클릭'];
+      }
+      // 즉시 Web Audio API AudioBuffer로 사전 디코딩 (0ms 즉시 재생 준비)
+      for (const [eventName, dataUrl] of Object.entries(sounds)) {
+        decodeAudioDataUrl(eventName, dataUrl);
+      }
+    }
+
+    /** 마스터 시트 '효과' 탭에 등록된 전체 효과음을 준비한다: 기기에 저장해 둔 것이 있으면 바로 쓰고, 필요할 때만 서버에서 받아 & 사전 디코딩 */
     function prefetchSoundEffects() {
-      google.script.run
-        .withSuccessHandler(res => {
-          if (res && res.success && res.sounds) {
-            Object.assign(SOUND_EFFECTS_CACHE, res.sounds);
-            if (SOUND_EFFECTS_CACHE['제미나이버튼클릭']) {
-              GEMINI_CLICK_SOUND_URL = SOUND_EFFECTS_CACHE['제미나이버튼클릭'];
-            }
-            // 수신 즉시 Web Audio API AudioBuffer로 사전 디코딩 (0ms 즉시 재생 준비)
-            for (const [eventName, dataUrl] of Object.entries(res.sounds)) {
-              decodeAudioDataUrl(eventName, dataUrl);
-            }
-          }
-        })
-        .withFailureHandler(() => { })
-        .getAllSoundEffectDataUrls();
+      sfxCacheGet_().then(rec => {
+        const have = !!(rec && rec.sounds && rec.version && Object.keys(rec.sounds).length);
+        if (have) applySoundEffects_(rec.sounds); // 저장해 둔 효과음으로 즉시 준비
+        if (have && Date.now() - (rec.checkedAt || 0) < SFX_REVALIDATE_MS) return; // 최근에 확인했으면 서버를 부르지 않는다
+        google.script.run
+          .withSuccessHandler(res => {
+            if (!res || !res.success) return;
+            if (res.unchanged && have) { sfxCachePut_({ sounds: rec.sounds, version: rec.version, checkedAt: Date.now() }); return; } // 바뀐 게 없음: 확인 시각만 갱신
+            if (!res.sounds) return;
+            applySoundEffects_(res.sounds);
+            if (res.version && res.complete !== false) sfxCachePut_({ sounds: res.sounds, version: res.version, checkedAt: Date.now() }); // 빠짐없이 받았을 때만 저장
+          })
+          .withFailureHandler(() => { })
+          .getAllSoundEffectDataUrls(have ? rec.version : '');
+      });
     }
 
     function prefetchGeminiClickSound() {
@@ -10798,7 +10914,7 @@
 
     window.addEventListener('load', () => {
       loadSfxMutePref_();
-      MSG.timer = setInterval(() => { if (!document.hidden && msgMaybe_()) refreshMsgBadge_(); }, 180000); // 쪽지 도착 확인
+      MSG.timer = setInterval(msgPollTick_, 180000); // 쪽지 도착 확인(관리자만 계속, 숨은 탭·거절된 로그인은 쉼)
       setTimeout(completeAppLoader, 850);
       loadRegionData();
       startRegionDataPolling();
@@ -10808,6 +10924,7 @@
       initMascotDemoMode_();
       setInterval(mascotEvaluate_, 60 * 1000); // 켜 둔 채 있어도 새 소식/팁 시점을 놓치지 않게 1분마다 로컬 판단
       initAuthGate();
+      prefillLoginEmail_();
       initMasterAccordionStrictCollapse();
       // 버튼 클릭음(효과음) 프리페치는 페이지 진입 직후 가장 먼저 끝나야 초반 클릭부터 0ms
       // 무지연이 보장된다. 뉴스 브리핑 오디오(Base64) 프리페치는 상대적으로 무거운 요청이라
