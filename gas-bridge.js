@@ -29,7 +29,9 @@
 
     if (!url) { fail(new Error('서버 주소가 설정되지 않았습니다.')); return; }
 
-    fetch(url, {
+    // 주소 뒤에 함수 이름을 붙인다(서버는 무시). 개발자도구 Network 목록에서 어떤 호출인지 바로 구분하기 위한 용도
+    var target = url + (url.indexOf('?') === -1 ? '?' : '&') + 'fn=' + encodeURIComponent(fn);
+    fetch(target, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
       body: JSON.stringify({ fn: fn, args: args }),
