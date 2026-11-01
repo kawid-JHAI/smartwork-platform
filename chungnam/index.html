@@ -5203,7 +5203,7 @@
               .withFailureHandler(() => fail('브리핑 음성을 불러오지 못했습니다.'))
               .getNewsBriefingAudioDataUrl(res.audioId);
           } else {
-            fail('아직 오늘의 브리핑이 없습니다 (매일 아침 7시·오후 1시 자동 생성)');
+            fail('아직 오늘의 브리핑이 없습니다 (매일 아침 7시 자동 생성)');
           }
         })
         .withFailureHandler(() => fail('브리핑을 불러오지 못했습니다.'))
@@ -5212,11 +5212,18 @@
 
     /** 페이지를 오래 켜 둔 경우 대비: 아직 브리핑이 없거나(07시 이후), 아침 브리핑만 들고 있는데 13시가 지났으면
      *  재생 중이 아닐 때 서버를 다시 확인해 새 브리핑으로 교체한다. */
+    let NEWS_BRIEFING_LAST_CHECK_ = 0;
     function refreshNewsBriefingIfNeeded_() {
       const audioEl = document.getElementById('newsBriefingAudioEl');
       if (audioEl && !audioEl.paused) return;
-      const h = new Date().getHours();
-      if ((!NEWS_BRIEFING_SLOT && h >= 7) || (NEWS_BRIEFING_SLOT === '아침' && h >= 13)) prefetchNewsBriefing();
+      const now = new Date(), h = now.getHours();
+      // 브리핑은 하루 한 번(아침 7시대 생성)만 있다. 오늘 날짜의 브리핑을 아직 못 받았을 때만 확인한다(밤새 열어 둔 탭은 다음 날 새 브리핑을 받는다).
+      const ymd = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
+      const loadedDate = String((NEWS_BRIEFING_META && NEWS_BRIEFING_META.key) || '').split('|')[0];
+      if (h < 7 || loadedDate === ymd) return;
+      if (Date.now() - NEWS_BRIEFING_LAST_CHECK_ < 5 * 60 * 1000) return; // 아직 생성 전이거나 실패한 날에 서버를 계속 부르지 않는다
+      NEWS_BRIEFING_LAST_CHECK_ = Date.now();
+      prefetchNewsBriefing();
     }
 
     function toggleNewsBriefingPlayback() {
