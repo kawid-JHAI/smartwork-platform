@@ -16,6 +16,21 @@
     getLatestNews: 1, getNoticeData: 1, getRegionDataVersion: 1, getRegionSwitchList: 1, getSheetData: 1, getTodayNewsBriefing: 1, validateMemberSession: 1 };
   var BATCH_WINDOW_MS = 40;   // 이 시간 안에 들어온 호출을 한 묶음으로 본다
   var BATCH_MAX = 15;         // 서버 BATCH_MAX_CALLS_ 와 같다
+  // 한 서버 실행 안에서는 호출이 차례로 처리되므로, 무거운 호출을 한 묶음에 몰면 오히려 느려진다.
+  // 그래서 호출의 대략적인 무게(실측: 가벼운 것 ≈0.2~0.3, 시트 읽기 ≈2, 기본정보 ≈3)로 최대 3개 묶음에 고르게 나눠 동시에 보낸다.
+  var WEIGHT = { getBasicInfo: 3, getSheetData: 2, getGalleryData: 2, getRegionSwitchList: 1, getLatestNews: 0.3, getRegionDataVersion: 0.3, getGalleryPermission: 0.2, getCurrentUserGreeting: 0.2 };
+  var GROUP_TARGET = 4;       // 묶음 하나가 맡을 무게의 목표치
+  var GROUP_MAX = 3;          // 한 번에 동시에 보내는 묶음 수의 최대
+  function splitGroups(items) {
+    var total = 0; items.forEach(function (it) { it.w = WEIGHT[it.fn] != null ? WEIGHT[it.fn] : 1; total += it.w; });
+    var g = Math.max(1, Math.min(GROUP_MAX, Math.ceil(total / GROUP_TARGET)));
+    var groups = []; for (var i = 0; i < g; i++) groups.push({ sum: 0, items: [] });
+    items.map(function (it, idx) { return { it: it, idx: idx }; }).sort(function (a, b) { return b.it.w - a.it.w || a.idx - b.idx; }).forEach(function (x) {
+      var best = groups[0]; groups.forEach(function (gr) { if (gr.sum < best.sum) best = gr; });
+      best.items.push(x); best.sum += x.it.w;
+    });
+    return groups.map(function (gr) { return gr.items.sort(function (a, b) { return a.idx - b.idx; }).map(function (x) { return x.it; }); }).filter(function (gr) { return gr.length; });
+  }
   var queue = [], flushTimer = null, batchSupported = true;
   var stats = window.__gasBridgeStats = { batches: 0, batched: 0, singles: 0, fallbacks: 0 }; // 점검용(개발자도구에서 확인)
 
@@ -94,7 +109,9 @@
     if (flushTimer) { clearTimeout(flushTimer); flushTimer = null; }
     while (queue.length) {
       var items = queue.splice(0, BATCH_MAX);
-      if (items.length === 1) sendSingle(items[0]); else sendBatch(items);
+      splitGroups(items).forEach(function (grp) {
+        if (grp.length === 1) sendSingle(grp[0]); else sendBatch(grp);
+      });
     }
   }
 
