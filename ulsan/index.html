@@ -9431,7 +9431,9 @@
     }
 
     // ── 공통 로딩 표시: 협회 심볼 + 회전 링 ──
-    const KW_CI_URL_ = '../favicon.png'; // 빌드가 저장소 안의 가벼운 파일로 바꿔 준다
+    // 빌드가 이 주소를 저장소 안의 가벼운 파일로 바꿔 준다.
+    // 주의: 문자열 속 주소는 https:\/\/ 로 적는다. 평범하게 https:// 로 적으면 구글 서버가 이 줄의 // 뒤를 잘라내 화면 전체가 멈춘다.
+    const KW_CI_URL_ = '../favicon.png';
     function kwRingHtml_(small) { return '<span class="kw-ring' + (small ? ' kw-sm' : '') + '" aria-hidden="true"><img src="' + KW_CI_URL_ + '" alt=""></span>'; }
     /** 목록이 들어갈 자리에 넣는 로딩 표시 */
     function kwLoadingHtml_(text) { return '<div class="kw-load" role="status" aria-live="polite">' + kwRingHtml_(false) + '<span>' + (text || '불러오는 중...') + '</span></div>'; }
@@ -10813,7 +10815,7 @@
     //  · 목록은 서버 캐시를 통해 읽고(열 때 1회), 올리기/삭제 후에는 곧바로 다시 불러온다. 별도 폴링 없음.
     //  · 올리기는 이 지부에 로그인한 회원(또는 이 지부 관리자)만, 삭제는 올린 사람 본인 또는 관리자만(서버에서도 매번 확인).
     // ========================================================
-    const RESOURCE = { list: [], categories: ['서식', '공문', '교육자료', '매뉴얼', '기타'], me: { canUpload: false, admin: false, key: '' }, loaded: false, loading: false, filter: '전체', query: '', tab: 'list', maxMB: 10, uploading: false, file: null };
+    const RESOURCE = { list: [], central: [], categories: ['서식', '공문', '교육자료', '매뉴얼', '기타'], me: { canUpload: false, admin: false, key: '' }, loaded: false, loading: false, filter: '전체', query: '', tab: 'list', maxMB: 10, uploading: false, file: null };
     const RESOURCE_EXTS = ['pdf', 'hwp', 'hwpx', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt', 'csv', 'zip', 'jpg', 'jpeg', 'png', 'gif'];
 
     function resourceToken_() { return (MEMBER_SESSION && MEMBER_SESSION.token) || ''; }
@@ -10873,9 +10875,41 @@
       if (!list) renderResourceUploadState_();
     }
 
+    /** 중앙협회가 올린 자료(맨 위 "중앙협회 자료" 구역). 못 불러와도 이 협회 자료실은 그대로 쓴다 */
+    function loadCentralResources_() {
+      try {
+        google.script.run
+          .withSuccessHandler(res => { RESOURCE.central = (res && res.success && res.list) ? res.list : []; if (RESOURCE.loaded) renderResources(); })
+          .withFailureHandler(() => { })
+          .getCentralResources(CURRENT_REGION, resourceToken_());
+      } catch (e) { }
+    }
+
+    /** 중앙협회 자료 구역(내려받기·열어보기만, 삭제는 중앙에서만) */
+    function centralSectionHtml_(rows, total) {
+      const cards = rows.map(x =>
+        '<div class="bg-white border border-blue-100 border-l-4 border-l-blue-700 p-3 flex flex-col gap-2.5">' +
+        '<div class="flex items-start gap-2.5">' +
+        '<div class="w-10 h-10 shrink-0 bg-blue-50 text-blue-800 flex items-center justify-center"><span class="material-symbols-outlined text-[22px]">' + resourceIcon_(x.fileName) + '</span></div>' +
+        '<div class="min-w-0 flex-1">' +
+        '<span class="inline-block px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 text-[10px] font-bold">' + pvEsc_(x.category) + '</span>' +
+        '<div class="font-bold text-sm text-slate-800 break-keep mt-1">' + pvEsc_(x.title) + '</div>' +
+        (x.desc ? '<div class="text-[11px] text-slate-500 mt-0.5 whitespace-pre-line break-words">' + pvEsc_(x.desc) + '</div>' : '') +
+        '<div class="text-[10.5px] text-slate-400 mt-1.5 break-all">' + pvEsc_(x.fileName) + ' · ' + resourceSize_(x.size) + ' · ' + pvEsc_((x.at || '').slice(0, 10)) + '</div>' +
+        '</div></div>' +
+        '<div class="flex gap-2">' +
+        '<a href="' + resourceDownloadUrl_(x.fileId) + '" target="_blank" rel="noopener" class="flex-1 py-2 bg-blue-700 hover:bg-blue-800 text-white text-xs font-bold flex items-center justify-center gap-1 transition-colors"><span class="material-symbols-outlined text-[16px]">download</span>내려받기</a>' +
+        '<a href="' + resourceViewUrl_(x.fileId) + '" target="_blank" rel="noopener" title="새 창에서 열어보기" class="px-3 py-2 border border-slate-300 text-slate-600 hover:bg-slate-50 flex items-center justify-center transition-colors"><span class="material-symbols-outlined text-[16px]">open_in_new</span></a>' +
+        '</div></div>').join('');
+      return '<div class="border border-blue-200 bg-blue-50/70">' +
+        '<div class="px-3 py-2 bg-blue-800 text-white flex items-center gap-1.5"><span class="material-symbols-outlined text-[18px]">verified</span><span class="font-bold text-xs">중앙협회 자료</span><span class="text-[10px] opacity-80">(' + total + ')</span><span class="ml-auto text-[10px] opacity-80">한국장애인복지시설협회 공식 자료</span></div>' +
+        '<div class="p-2 flex flex-col gap-2">' + cards + '</div></div>';
+    }
+
     function loadResources() {
       const box = document.getElementById('resListBox');
       if (!box) return;
+      loadCentralResources_();
       RESOURCE.loading = true;
       if (!RESOURCE.loaded) box.innerHTML = '<div class="py-16 text-center text-slate-400 text-xs flex flex-col items-center gap-2"><span class="material-symbols-outlined text-3xl animate-spin text-rose-600">progress_activity</span><span>자료를 불러오는 중입니다...</span></div>';
       google.script.run
@@ -10905,12 +10939,14 @@
 
     function renderResources() {
       const all = RESOURCE.list;
-      document.getElementById('resTabCount').textContent = RESOURCE.loaded ? '(' + all.length + ')' : '';
-      // 분류 칩
+      const central = RESOURCE.central || [];
+      document.getElementById('resTabCount').textContent = RESOURCE.loaded ? '(' + (all.length + central.length) + ')' : '';
+      // 분류 칩(중앙협회 자료의 분류도 함께)
       const cats = ['전체'].concat(RESOURCE.categories);
+      central.forEach(x => { if (cats.indexOf(x.category) === -1) cats.push(x.category); });
       document.getElementById('resChips').innerHTML = cats.map(c => {
         const on = RESOURCE.filter === c;
-        const n = c === '전체' ? all.length : all.filter(x => x.category === c).length;
+        const n = c === '전체' ? all.length + central.length : all.filter(x => x.category === c).length + central.filter(x => x.category === c).length;
         return '<button type="button" onclick="resourceSetFilter(\'' + c + '\')" class="shrink-0 px-3 py-1 border text-[11px] font-bold transition-colors ' +
           (on ? 'bg-rose-600 border-rose-600 text-white' : 'bg-white border-slate-300 text-slate-500 hover:bg-slate-50') + '">' + pvEsc_(c) + ' ' + n + '</button>';
       }).join('');
@@ -10919,13 +10955,18 @@
       const q = RESOURCE.query.trim().toLowerCase();
       const rows = all.filter(x => (RESOURCE.filter === '전체' || x.category === RESOURCE.filter) &&
         (!q || (x.title + ' ' + x.desc + ' ' + x.fileName + ' ' + x.facility + ' ' + x.owner).toLowerCase().includes(q)));
-      if (!all.length) {
+      const crows = central.filter(x => (RESOURCE.filter === '전체' || x.category === RESOURCE.filter) &&
+        (!q || (x.title + ' ' + x.desc + ' ' + x.fileName + ' ' + x.owner).toLowerCase().includes(q)));
+      const centralHtml = crows.length ? centralSectionHtml_(crows, central.length) : '';
+      if (!all.length && !central.length) {
         box.innerHTML = '<div class="py-14 text-center text-slate-400 text-xs flex flex-col items-center gap-2"><span class="material-symbols-outlined text-4xl text-slate-300">folder_off</span><span>아직 올라온 자료가 없어요.</span>' +
           '<button type="button" onclick="switchResourceTab(\'upload\')" class="mt-1 px-4 py-2 bg-rose-600 text-white text-xs font-bold">첫 자료 올리기</button></div>';
         return;
       }
-      if (!rows.length) { box.innerHTML = '<div class="py-12 text-center text-slate-400 text-xs">조건에 맞는 자료가 없어요.</div>'; return; }
-      box.innerHTML = rows.map(x => {
+      if (!rows.length && !crows.length) { box.innerHTML = '<div class="py-12 text-center text-slate-400 text-xs">조건에 맞는 자료가 없어요.</div>'; return; }
+      const regionHead = centralHtml ? '<div class="text-[11px] font-bold text-slate-500 pt-1">우리 협회 자료 (' + all.length + ')</div>' : '';
+      const regionEmpty = (!rows.length && centralHtml) ? '<div class="py-6 text-center text-slate-400 text-xs">' + (all.length ? '조건에 맞는 우리 협회 자료가 없어요.' : '아직 올라온 우리 협회 자료가 없어요.') + '</div>' : '';
+      box.innerHTML = centralHtml + regionHead + regionEmpty + rows.map(x => {
         const mine = RESOURCE.me.key && x.ownerKey === RESOURCE.me.key;
         const canDelete = RESOURCE.me.admin || mine;
         return '<div class="bg-white border border-border-subtle p-3 flex flex-col gap-2.5">' +
