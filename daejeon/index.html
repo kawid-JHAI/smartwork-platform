@@ -1167,6 +1167,22 @@
       }
     }
   </style>
+<style id="kwBusyStyle">
+  /* 공통 로딩 표시(협회 심볼 + 회전 링) */
+  .kw-ring { position: relative; width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center; flex: none; }
+  .kw-ring img { width: 24px; height: 24px; object-fit: contain; }
+  .kw-ring::before { content: ""; position: absolute; inset: 0; border: 3px solid #dbe5fb; border-top-color: #0051d5; border-radius: 50%; animation: kw-spin 1s linear infinite; }
+  .kw-ring.kw-sm { width: 36px; height: 36px; }
+  .kw-ring.kw-sm img { width: 19px; height: 19px; }
+  .kw-load { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 28px 0; color: #64748b; font-size: 12px; }
+  #kwBusy { position: fixed; inset: 0; z-index: 9000; display: none; align-items: center; justify-content: center; background: rgba(15, 23, 42, .45); }
+  #kwBusy.on { display: flex; }
+  #kwBusy .kw-card { background: #fff; border: 1px solid #e2e8f0; box-shadow: 0 8px 28px rgba(0, 0, 0, .22); padding: 20px 30px; min-width: 190px; max-width: 80vw; display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; }
+  #kwBusy .kw-t { font-size: 14px; font-weight: 700; color: #1f2a33; }
+  #kwBusy .kw-s { font-size: 11.5px; color: #64748b; }
+  @keyframes kw-spin { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) { .kw-ring::before { animation-duration: 2.4s; } }
+</style>
 </head>
 
 <body class="bg-surface-container-low text-slate-800 antialiased font-['Public_Sans',sans-serif]">
@@ -2591,7 +2607,7 @@
             </button>
           </div>
           <div id="myTrainingList" class="flex flex-col gap-2">
-            <div class="py-6 text-center text-[11px] text-slate-400">불러오는 중...</div>
+            <div class="kw-load"><span class="kw-ring"><img src="../favicon.png" alt=""></span><span>이수 현황을 불러오는 중...</span></div>
           </div>
         </div>
 
@@ -2605,7 +2621,7 @@
             </button>
           </div>
           <div id="myDuesList" class="flex flex-col gap-2">
-            <div class="py-6 text-center text-[11px] text-slate-400">불러오는 중...</div>
+            <div class="kw-load"><span class="kw-ring"><img src="../favicon.png" alt=""></span><span>회비 내역을 불러오는 중...</span></div>
           </div>
         </div>
       </div>
@@ -3571,6 +3587,8 @@
     const ADMIN_URL = 'https://script.google.com/macros/s/AKfycbxkLkjA6d2Kjj5dGF0XbZydJCa4Y4KFkCSCEIS8PqdN7l9G4gRWunGGrd5A4HeKq3dP/exec';
     // 드라이브 파일 ID -> 저장소 내 이미지 경로(빌드가 채운다). 비공개 드라이브 파일의 직링크는 로그인 창으로 넘어가 이미지가 안 보이고 느리다.
     const LOCAL_IMAGE_MAP = {"1N31faywgz2zYK5eI9TsY3ULIVqWpE5vY":"../regions/1.png","1Em5eqzJCSatXqoz2Z1CDbi1XRlzJqlZI":"../regions/2.png","1tM3Xkt0WBSqKF6Q-mNhsFUXFU-QnQkFS":"../regions/3.png","1g8M4J3irzZZ643FCuOFycBL2kYZYZTQl":"../regions/4.png","16ufd8Jyww0HU3Qp2-WGOKAMNX2d_MBWO":"../regions/5.png","1K4xsqCdG96RUE6upt0GwwzReO2lbzwJ6":"../regions/6.png","1cbUvJx02PCnktpiU9YQ2IsGXU2B7mVW6":"../regions/7.png","1_ETOtmWJilULFkmbzrtSkpQypOM0rxdm":"../regions/8.png","1wVL_mRKTV-ZFwrWD6XBIaYnwFhtXmJWR":"../regions/9.png","1BW651-VqDBApyP3RKqNem1p1CKNiVL_r":"../regions/10.png","1NZdG1assX3SOQPuF2xneSgF8UU8MyLAI":"../regions/11.png","1gQ_ovfGo5ngaMbpHbJqqRjxsyy9EYoo3":"../regions/12.png","1uiOcoE5YZYL9B4JxKEffi28pN6AnUoKn":"../regions/13.png","1WelF5pySaht6RngmY38hLZmi9b42u0H1":"../regions/14.png","1fDEGF2X2HR7uewcfwpdU7xd0pZYZtcQz":"../regions/15.png","1kg6ailColQzv5YXfa3T76aIBDHInoUHQ":"../regions/16.png","1gZrSgwNexUW229dJuk59ne9XoJVSD0Kl":"../regions/17.png","10V2u1qBflL1mCs0T_6LQZzvii8x_-p0_":"../favicon.png","1uFE69Tj24eEIw152xfXHGmDAYFu412Ro":"../ci-full.png"};
+    // 지방협회 이름 -> 저장소 안의 로고 파일(빌드가 채운다). 허브 시트의 드라이브 이미지 ID가 달라도 지역 이름으로 가벼운 로컬 파일을 쓴다
+    const LOCAL_REGION_LOGOS = {"서울":"../regions/1.png","부산":"../regions/2.png","대구":"../regions/3.png","인천":"../regions/4.png","광주":"../regions/5.png","대전":"../regions/6.png","울산":"../regions/7.png","세종":"../regions/8.png","경기":"../regions/9.png","강원":"../regions/10.png","충북":"../regions/11.png","충남":"../regions/12.png","전북":"../regions/13.png","전남":"../regions/14.png","경북":"../regions/15.png","경남":"../regions/16.png","제주":"../regions/17.png"};
     function localImageUrl_(url) {
       const m = String(url || '').match(/(?:lh3\.googleusercontent\.com\/d\/|drive\.google\.com\/file\/d\/|[?&]id=)([a-zA-Z0-9_-]+)/i);
       return (m && LOCAL_IMAGE_MAP[m[1]]) || '';
@@ -4729,7 +4747,7 @@
     function renderMyTrainingList() {
       const container = document.getElementById('myTrainingList');
       if (!container || !MEMBER_SESSION) return;
-      container.innerHTML = '<div class="py-6 text-center text-[11px] text-slate-400">불러오는 중...</div>';
+      container.innerHTML = kwLoadingHtml_('이수 현황을 불러오는 중...');
 
       google.script.run
         .withSuccessHandler(res => {
@@ -4770,7 +4788,7 @@
     function renderMyDuesList() {
       const container = document.getElementById('myDuesList');
       if (!container || !MEMBER_SESSION) return;
-      container.innerHTML = '<div class="py-6 text-center text-[11px] text-slate-400">불러오는 중...</div>';
+      container.innerHTML = kwLoadingHtml_('회비 내역을 불러오는 중...');
 
       google.script.run
         .withSuccessHandler(res => {
@@ -8167,6 +8185,7 @@
       const errEl = document.getElementById('certificateGateErrorMsg');
       errEl.classList.add('hidden');
       setBtnLoading(btn, '확인 중...');
+      showBusy_('이수확인증을 발급하는 중', '본인 확인을 하고 있어요');
 
       const courseId = document.getElementById('certificateGateCourseId').value;
       const courseName = document.getElementById('certificateGateCourseNameValue').value;
@@ -8174,6 +8193,7 @@
 
       google.script.run
         .withSuccessHandler(res => {
+          hideBusy_();
           restoreBtnLoading(btn);
           if (res && res.success) {
             closeCertificateGate();
@@ -8184,6 +8204,7 @@
           }
         })
         .withFailureHandler(err => {
+          hideBusy_();
           restoreBtnLoading(btn);
           errEl.textContent = '오류가 발생했습니다: ' + (err.message || err);
           errEl.classList.remove('hidden');
@@ -8229,6 +8250,7 @@
       const errEl = document.getElementById('feeReceiptGateErrorMsg');
       errEl.classList.add('hidden');
       setBtnLoading(btn, '확인 중...');
+      showBusy_('교육비영수증을 발급하는 중', '본인 확인을 하고 있어요');
 
       const courseId = document.getElementById('feeReceiptGateCourseId').value;
       const courseName = document.getElementById('feeReceiptGateCourseNameValue').value;
@@ -8236,6 +8258,7 @@
 
       google.script.run
         .withSuccessHandler(res => {
+          hideBusy_();
           restoreBtnLoading(btn);
           if (res && res.success) {
             closeFeeReceiptGate();
@@ -8246,6 +8269,7 @@
           }
         })
         .withFailureHandler(err => {
+          hideBusy_();
           restoreBtnLoading(btn);
           errEl.textContent = '오류가 발생했습니다: ' + (err.message || err);
           errEl.classList.remove('hidden');
@@ -8679,9 +8703,11 @@
     function openDuesReceipt(duesId, btnEl) {
       if (!duesId) return;
       setBtnLoading(btnEl, '불러오는 중...');
+      showBusy_('영수증을 불러오는 중', '잠시만 기다려 주세요');
 
       google.script.run
         .withSuccessHandler(res => {
+          hideBusy_();
           restoreBtnLoading(btnEl);
           if (!res || !res.success) {
             alert((res && res.error) || '영수증 정보를 불러오지 못했습니다.');
@@ -8703,6 +8729,7 @@
           document.getElementById('duesReceiptView').classList.remove('hidden');
         })
         .withFailureHandler(err => {
+          hideBusy_();
           restoreBtnLoading(btnEl);
           alert('영수증 조회 중 오류가 발생했습니다: ' + (err.message || err));
         })
@@ -9403,6 +9430,35 @@
       btn.innerHTML = '<span class="material-symbols-outlined text-[14px] animate-spin">progress_activity</span>';
     }
 
+    // ── 공통 로딩 표시: 협회 심볼 + 회전 링 ──
+    const KW_CI_URL_ = '../favicon.png'; // 빌드가 저장소 안의 가벼운 파일로 바꿔 준다
+    function kwRingHtml_(small) { return '<span class="kw-ring' + (small ? ' kw-sm' : '') + '" aria-hidden="true"><img src="' + KW_CI_URL_ + '" alt=""></span>'; }
+    /** 목록이 들어갈 자리에 넣는 로딩 표시 */
+    function kwLoadingHtml_(text) { return '<div class="kw-load" role="status" aria-live="polite">' + kwRingHtml_(false) + '<span>' + (text || '불러오는 중...') + '</span></div>'; }
+    let KW_BUSY_TIMER_ = 0;
+    /** 창이 닫힌 뒤 서버에서 가져오는 동안 화면 전체에 띄우는 안내. hideBusy_()와 짝으로 쓰며, 응답이 없어도 40초 뒤 스스로 닫힌다 */
+    function showBusy_(title, sub) {
+      let el = document.getElementById('kwBusy');
+      if (!el) {
+        el = document.createElement('div');
+        el.id = 'kwBusy';
+        el.setAttribute('role', 'status');
+        el.setAttribute('aria-live', 'polite');
+        document.body.appendChild(el);
+      }
+      el.innerHTML = '<div class="kw-card">' + kwRingHtml_(true) + '<div class="kw-t"></div><div class="kw-s"></div></div>';
+      el.querySelector('.kw-t').textContent = title || '불러오는 중';
+      el.querySelector('.kw-s').textContent = sub || '잠시만 기다려 주세요';
+      el.classList.add('on');
+      clearTimeout(KW_BUSY_TIMER_);
+      KW_BUSY_TIMER_ = setTimeout(hideBusy_, 40000);
+    }
+    function hideBusy_() {
+      clearTimeout(KW_BUSY_TIMER_);
+      const el = document.getElementById('kwBusy');
+      if (el) el.classList.remove('on');
+    }
+
     /** setBtnLoading()으로 바꿔둔 버튼을 원래 텍스트/활성 상태로 되돌린다. */
     function restoreBtnLoading(btn) {
       if (!btn) return;
@@ -9482,14 +9538,7 @@
     function loadRegionSwitchList() {
       const body = document.getElementById('regionSwitchListBody');
       if (!body) return;
-      body.innerHTML = `
-        <div class="py-10 flex flex-col items-center gap-2 text-slate-400">
-          <svg class="animate-spin w-6 h-6 text-secondary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
-          </svg>
-          <span class="text-xs">지부 목록을 불러오는 중...</span>
-        </div>`;
+      body.innerHTML = kwLoadingHtml_('지부 목록을 불러오는 중...');
       google.script.run
         .withSuccessHandler(res => {
           if (res && res.success) {
@@ -9520,7 +9569,7 @@
         const label = esc(item.associationName);
         const textBtn = `<span class="block w-full text-sm font-bold text-slate-800 leading-snug break-keep p-3">${label}</span>`;
         const inner = item.imageUrl
-          ? `<img src="${esc(localImageUrl_(item.imageUrl) || item.imageUrl)}" alt="${label}" loading="lazy" class="block h-auto object-contain" style="width:97.7%;margin-right:2.3%" onerror="this.outerHTML=this.parentNode.dataset.fallback" />`
+          ? `<img src="${esc(LOCAL_REGION_LOGOS[item.region] || localImageUrl_(item.imageUrl) || item.imageUrl)}" alt="${label}" loading="lazy" class="block h-auto object-contain" style="width:97.7%;margin-right:2.3%" onerror="this.outerHTML=this.parentNode.dataset.fallback" />`
           : textBtn;
         return `
         <button type="button" onclick="navigateToRegion('${item.region}')" title="${label}" aria-label="${label}" data-fallback="${esc(textBtn)}"
@@ -10992,11 +11041,27 @@
     }
 
     // 서버 데이터 요청은 이미지·글꼴까지 전부 받는 load 이벤트를 기다리지 않고, 화면 뼈대(DOM)가 준비되면 바로 시작한다(처음 방문 약 1초 단축)
+    let REGION_LOGO_PRELOAD_ = [];
+    /** 지방협회 이동 서랍의 로고(16~17장, 약 2MB)를 로딩 게이지가 차는 동안(서버 응답을 기다리는 동안) 미리 받아 둔다. 낮은 우선순위라 핵심 데이터를 늦추지 않으며(같은 서버 맞비교: 로딩 시간 차이는 측정 흔들림 안), 서랍을 열 때는 이미 준비되어 있다 */
+    function preloadRegionLogos_() {
+      if (REGION_LOGO_PRELOAD_.length) return; // 한 번만
+      try {
+        const urls = Object.keys(LOCAL_REGION_LOGOS || {}).map(k => LOCAL_REGION_LOGOS[k]);
+        urls.forEach(u => {
+          const im = new Image();
+          try { im.fetchPriority = 'low'; } catch (e) { }
+          im.decoding = 'async';
+          im.src = u;
+          REGION_LOGO_PRELOAD_.push(im);
+        });
+      } catch (e) { }
+    }
+
     let APP_BOOTED_EARLY_ = false;
     function bootEarly_() {
       if (APP_BOOTED_EARLY_) return;
       APP_BOOTED_EARLY_ = true;
-      [loadSfxMutePref_, loadRegionData, startRegionDataPolling, initAuthGate, prefillLoginEmail_, prefetchSoundEffects, prefetchRegionSwitchList].forEach(fn => {
+      [loadSfxMutePref_, loadRegionData, startRegionDataPolling, initAuthGate, prefillLoginEmail_, prefetchSoundEffects, prefetchRegionSwitchList, preloadRegionLogos_].forEach(fn => {
         try { fn(); } catch (e) { console.error('[bootEarly] ' + (fn && fn.name) + ' 실패:', e); }
       });
     }
