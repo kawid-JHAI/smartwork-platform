@@ -2059,7 +2059,7 @@
           <button type="button" onclick="openRegionSwitchModal()"
             class="quick-tile-btn py-2.5 lg:py-3 flex flex-col lg:flex-row items-center justify-center gap-1 lg:gap-2 bg-secondary rounded-none">
             <span class="material-symbols-outlined text-2xl text-white leading-none">diversity_3</span>
-            <span class="text-white text-xs font-bold leading-tight">지방협회</span>
+            <span class="text-white text-xs font-bold leading-tight">시도협회</span>
           </button>
           <button type="button" onclick="openDuesModal()"
             class="quick-tile-btn py-2.5 lg:py-3 flex flex-col lg:flex-row items-center justify-center gap-1 lg:gap-2 bg-emerald-600 rounded-none">
@@ -2656,7 +2656,7 @@
       <div class="flex items-center gap-2.5 min-w-0">
         <div class="drawer-head-icon"><span class="material-symbols-outlined text-[20px]">diversity_3</span></div>
         <div class="min-w-0">
-          <h3 class="font-bold text-sm tracking-tight leading-tight">지방협회 이동</h3>
+          <h3 class="font-bold text-sm tracking-tight leading-tight">시도협회 이동</h3>
           <p class="text-[10px] leading-tight opacity-80 mt-0.5">다른 지부로 바로 이동해요</p>
         </div>
       </div>
@@ -2922,7 +2922,7 @@
         <div class="flex flex-col min-w-0">
           <span class="font-bold text-blue-950 text-xs flex items-center gap-1">
             <span class="material-symbols-outlined text-sm text-secondary">info</span>
-            지방협회별 회비 책정 안내
+            시도협회별 회비 책정 안내
           </span>
           <span class="text-[11px] text-slate-600 mt-0.5">상·하반기 회비 및 시설유형별 납부 기준은 공지사항을 참조해주세요.</span>
         </div>
@@ -6604,7 +6604,7 @@
       if (cat !== '회비납부' && cat !== '회비납부안내') return;
       const year = document.getElementById('duesNoticeYear') ? document.getElementById('duesNoticeYear').value : '2026';
       const period = document.getElementById('duesNoticePeriod') ? document.getElementById('duesNoticePeriod').value : '상반기';
-      const regionName = (typeof CURRENT_REGION !== 'undefined' && CURRENT_REGION && CURRENT_REGION !== 'HQ') ? (CURRENT_REGION + '협회') : '지방협회';
+      const regionName = (typeof CURRENT_REGION !== 'undefined' && CURRENT_REGION && CURRENT_REGION !== 'HQ') ? (CURRENT_REGION + '협회') : '시도협회';
       const titleInput = document.getElementById('noticeTitleInput');
       if (titleInput && (!titleInput.value || titleInput.value.includes('협회비 납부 안내'))) {
         titleInput.value = `${year}년 ${regionName} ${period} 협회비 납부 안내`;
