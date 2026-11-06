@@ -1309,11 +1309,11 @@
           </div>
 
           <!-- 하단 콘텐츠 행: 좌측 메트릭 카드 2종 / 우측 뉴스 센터 (가가 버튼 바로 아래부터 시작) -->
-          <div class="grid grid-cols-1 lg:grid-cols-12 lg:gap-6 gap-3 items-stretch">
+          <div id="heroGrid" class="grid grid-cols-1 lg:grid-cols-12 lg:gap-6 gap-3 items-stretch">
             <!-- 좌측 컬럼: 메트릭 카드 2종 (직각 모서리) -->
-            <div class="lg:col-span-6 flex flex-col justify-between">
-              <div class="grid grid-cols-2 lg:grid-cols-5 gap-2.5 h-full">
-                  <div class="facility-card-hero col-span-1 lg:col-span-3 rounded-none p-3.5 lg:p-5 flex flex-col justify-between shadow-md border border-white/15 lg:border-white/20">
+            <div id="heroColLeft" class="lg:col-span-6 flex flex-col justify-between">
+              <div id="heroLeftGrid" class="grid grid-cols-2 lg:grid-cols-5 gap-2.5 h-full">
+                  <div id="heroFacilityCard" class="facility-card-hero col-span-1 lg:col-span-3 rounded-none p-3.5 lg:p-5 flex flex-col justify-between shadow-md border border-white/15 lg:border-white/20">
                     <!-- 📱 모바일 뷰: 상단 라벨+숫자 / 중단 슬림 세그먼트 막대 게이지 / 하단 가로 범례 (lg:hidden) -->
                     <div class="lg:hidden flex flex-col justify-between h-full">
                       <div>
@@ -1352,7 +1352,7 @@
                   </div>
 
                   <!-- 우측: 협회장 카드 (모바일 50% 1:1 대칭 폭, 데스크탑 40%) -->
-                  <div
+                  <div id="heroLeaderCard"
                     class="bg-white/10 backdrop-blur-md col-span-1 lg:col-span-2 rounded-none p-3.5 lg:p-5 border border-white/15 flex flex-col justify-between shadow-sm">
                     <div>
                       <div class="flex items-center justify-between text-blue-200">
@@ -1373,7 +1373,7 @@
             </div>
 
             <!-- 우측 컬럼: 뉴스 센터 (가가 버튼 아래부터 배치, 데스크탑 3행 동시 노출 / 모바일 1행 롤링) -->
-            <div class="lg:col-span-6 flex flex-col justify-between">
+            <div id="heroColNews" class="lg:col-span-6 flex flex-col justify-between">
               <div class="bg-black/30 backdrop-blur-md border border-white/25 rounded-none shadow-sm text-white overflow-hidden h-full flex flex-col justify-between">
                 <!-- 모바일 전용: 실시간 복지뉴스 1행 롤링 전광판 (5초 간격) -->
                 <div id="newsTickerContainer"
@@ -1584,7 +1584,7 @@
                         </div>
                       </div>
                     </div>
-                    <p id="introCoreValue" class="text-slate-600 leading-relaxed mt-1">이용인의 개별적 권리와 보통의 일상이 보장되는 포용적 복지 환경을 구축하고, 회원시설 간의 긴밀한 상생 협력망을 가동합니다.</p>
+                    <p id="introCoreValue" class="text-slate-600 leading-relaxed mt-1" style="white-space:pre-wrap;">이용인의 개별적 권리와 보통의 일상이 보장되는 포용적 복지 환경을 구축하고, 회원시설 간의 긴밀한 상생 협력망을 가동합니다.</p>
                   </div>
                 </div>
 
@@ -1600,7 +1600,7 @@
                         </div>
                       </div>
                     </div>
-                    <p id="introStaffWelfare" class="text-slate-600 leading-relaxed mt-1">현장 사회복지사의 처우 개선, 심리상담 바우처 지원, 전문 보수교육 운영을 통해 안전하고 신뢰받는 돌봄 터전을 만듭니다.</p>
+                    <p id="introStaffWelfare" class="text-slate-600 leading-relaxed mt-1" style="white-space:pre-wrap;">현장 사회복지사의 처우 개선, 심리상담 바우처 지원, 전문 보수교육 운영을 통해 안전하고 신뢰받는 돌봄 터전을 만듭니다.</p>
                   </div>
                 </div>
 
@@ -3711,6 +3711,9 @@
         appScroll.classList.remove('font-scale-1', 'font-scale-2', 'font-scale-3');
         appScroll.classList.add('font-scale-' + scale);
       }
+
+      // 글자 크기가 바뀌면 협회장 문구 줄바꿈이 달라지므로 상단 3칸 폭을 다시 맞춘다
+      try { if (typeof fitHeroLayout === 'function') setTimeout(fitHeroLayout, 60); } catch (e) { }
 
       // 제미나이 챗봇 서랍 패널에도 font-scale 클래스 명시 연동
       var geminiPanel = document.getElementById('geminiPanelWrap');
@@ -5878,6 +5881,52 @@
     // 하단 정책 팝업(오시는 길/개인정보처리방침 문의처 등)이 참조할 수 있도록 최신 기본정보를 기억해둔다
     let LATEST_BASIC_INFO = {};
 
+    // 상단 히어로(관내 회원시설 / 협회장 / 뉴스) 3칸 폭 자동 조절 (데스크탑 전용)
+    // 협회장 문구가 길어 카드가 세로로 길어지면, 뉴스 칸을 줄이고 협회장 칸을 오른쪽으로 넓힌다.
+    // 관내 회원시설 칸 폭은 그대로 두고, 문구가 짧으면 기존 비율(6:6)을 유지한다.
+    function fitHeroLayout() {
+      var grid = document.getElementById('heroGrid');
+      var colL = document.getElementById('heroColLeft');
+      var colN = document.getElementById('heroColNews');
+      var inner = document.getElementById('heroLeftGrid');
+      var fac = document.getElementById('heroFacilityCard');
+      var lead = document.getElementById('heroLeaderCard');
+      if (!grid || !colL || !colN || !inner || !fac || !lead) return;
+
+      var kids = [colL, colN, fac, lead];
+      function clearAll() {
+        grid.style.gridTemplateColumns = '';
+        inner.style.gridTemplateColumns = '';
+        kids.forEach(function (k) { k.style.gridColumn = ''; });
+      }
+      function apply(extra) {
+        // 바깥: 왼쪽(회원시설+협회장) 6+extra / 뉴스 6-extra,  안쪽: 회원시설 3.6 고정 / 협회장 2.4+extra
+        grid.style.gridTemplateColumns = 'minmax(0,' + (6 + extra) + 'fr) minmax(0,' + (6 - extra) + 'fr)';
+        inner.style.gridTemplateColumns = 'minmax(0,3.6fr) minmax(0,' + (2.4 + extra) + 'fr)';
+        kids.forEach(function (k) { k.style.gridColumn = 'auto'; });
+      }
+
+      // 모바일/태블릿(lg 미만)은 기존 레이아웃 그대로
+      if (window.innerWidth < 1024) { clearAll(); return; }
+
+      var wrap = document.getElementById('heroLeaderSlogan');
+      if (!wrap || wrap.style.display === 'none') { clearAll(); return; }
+
+      var TARGET_H = 260;           // 협회장 카드가 이 높이 이하가 되도록 폭을 넓힌다
+      var MAX_EXTRA = 2.5;          // 뉴스 칸 최소 폭 = 6 - 2.5 = 3.5/12 (약 29%)
+      var prevAlign = lead.style.alignSelf;
+      lead.style.alignSelf = 'start';   // 줄 높이에 늘어나지 않은 '본래 높이'를 재기 위해 잠시 해제
+      var chosen = 0;
+      for (var e = 0; e <= MAX_EXTRA + 0.001; e += 0.25) {
+        apply(e);
+        chosen = e;
+        if (lead.offsetHeight <= TARGET_H) break;
+      }
+      lead.style.alignSelf = prevAlign;
+      if (chosen === 0) clearAll();     // 짧은 문구면 기존 클래스 레이아웃으로 복귀
+    }
+    window.addEventListener('resize', function () { try { fitHeroLayout(); } catch (e) { } });
+
     function renderDynamicBasicInfo(info) {
       LATEST_BASIC_INFO = info || {};
       renderPreviewIntro();
@@ -5891,8 +5940,11 @@
       const heroSloganText = document.getElementById('heroLeaderSloganText');
       if (heroSloganWrap && heroSloganText) {
         const tagline = (info['홈페이지_설명'] || '').trim();
-        heroSloganText.textContent = tagline;
+        // 시트의 엔터(줄바꿈)를 화면에도 그대로 반영하되, 빈 줄은 한 줄로 줄여 카드가 불필요하게 길어지지 않게 한다
+        heroSloganText.style.whiteSpace = 'pre-line';
+        heroSloganText.textContent = tagline.replace(/\r\n?/g, '\n').replace(/\n{2,}/g, '\n');
         heroSloganWrap.style.display = tagline ? 'block' : 'none';
+        fitHeroLayout();
       }
 
       // 히어로: 사무국 전화 링크
