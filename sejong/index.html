@@ -3816,13 +3816,13 @@
       fns.forEach(fn => { try { fn(); } catch (e) { console.error(e); } });
     }
 
-    // ── 로더는 고정 시간이 아니라 "핵심 데이터(기본정보·회원시설목록)"가 도착하면 닫는다 ──
+    // ── 로더는 고정 시간이 아니라 "첫 화면에 보이는 것들(기본정보·회원시설목록·뉴스·로그인 확인)"이 모두 도착하면 닫는다 ──
     // (예전: 페이지가 열린 뒤 0.85초에 무조건 닫혀, 데이터가 뜰 때까지 숫자가 0인 빈 화면이 2~3초 보였다)
-    const LOADER_NEED_ = { basic: false, fac: false };
+    const LOADER_NEED_ = { basic: false, fac: false, news: false, auth: false };
     let loaderClosing_ = false;
     function loaderReady_(key) {
       LOADER_NEED_[key] = true;
-      if (LOADER_NEED_.basic && LOADER_NEED_.fac) closeLoaderSoon_();
+      if (LOADER_NEED_.basic && LOADER_NEED_.fac && LOADER_NEED_.news && LOADER_NEED_.auth) closeLoaderSoon_();
     }
     function closeLoaderSoon_() {
       if (loaderClosing_) return;
@@ -3998,8 +3998,13 @@
       if (RESET_TOKEN) {
         showAuthView('reset');
         openAuthGate();
+        loaderReady_('auth');
         return;
       }
+
+      // GitHub 화면(API 방식)은 서버가 접속자의 구글 계정을 알 수 없어(익명 호출) 직원 확인이 항상 "없음"이다.
+      // 서버를 한 번 헛걸음하지 않도록 건너뛰고 회원 세션 확인으로 바로 간다(구글 계정 직원은 서버 직접 접속 화면에서만 통과한다).
+      if (window.GAS_API_URL) { checkMemberSession(); return; }
 
       // 비로그인도 열람 가능한 메뉴가 있으므로 로그인 화면으로 가로막지 않는다.
       // '사용자권한관리'에 등록된 구글 계정은 "그 협회" 앱에서만 로그인 없이 통과한다(서버가 협회를 대조하므로 다른 협회에서는 null → 비회원과 동일).
@@ -4315,13 +4320,14 @@
       }, target === 'msg' ? 1800 : 600); // 쪽지는 관리자 판정이 끝난 뒤에 열어야 한다
     }
 
-    function finishAuthCheck_() { AUTH_READY = true; loadLockedData_(); refreshMsgBadge_(); handleOpenParam_(); }
+    function finishAuthCheck_() { AUTH_READY = true; loaderReady_('auth'); loadLockedData_(); refreshMsgBadge_(); handleOpenParam_(); }
 
     /** 비로그인 상태로 확정: 로그인 버튼을 보이고 둘러보기 화면을 연다 */
     function enterGuestMode_() {
       MEMBER_SESSION = null;
       clearGreeting();
       AUTH_READY = true;
+      loaderReady_('auth');
       loadLockedData_();
       refreshMsgBadge_();
       handleOpenParam_();
@@ -5069,23 +5075,42 @@
       return String(title || '').replace(/^\s*ep\.?\s*\d+\s*[-|·:]?\s*/i, '').trim();
     }
 
+    function applyNewsList_(list) {
+      LATEST_NEWS_LIST = list.map(item => ({ ...item, title: cleanNewsTitle_(item.title) }));
+      CURRENT_NEWS_INDEX = 0;
+      NEWS_DESKTOP_PAGE = 0;
+      NEWS_DESKTOP_LAST_SIG = null; // 새로 불러온 첫 렌더는 애니메이션 없이 바로 표시
+      renderNewsTicker();
+      startNewsTicker();
+    }
+
+    let NEWS_FIRST_LOAD_ = true;
     function loadLatestNews() {
+      // 처음 한 번만: 지난 방문 때 저장해 둔 뉴스(공개 데이터)가 있으면 서버 응답을 기다리지 않고 바로 보여 준다(뒤에서 최신으로 맞춘다)
+      const firstLoad = NEWS_FIRST_LOAD_;
+      NEWS_FIRST_LOAD_ = false;
+      const cachedNews = firstLoad ? dataCacheGet_('news') : null;
+      let usedNewsCache = false, cachedNewsSig = '';
+      if (Array.isArray(cachedNews) && cachedNews.length) {
+        try { applyNewsList_(cachedNews); usedNewsCache = true; cachedNewsSig = JSON.stringify(cachedNews); } catch (e) { }
+      }
+      if (usedNewsCache) loaderReady_('news');
+
       google.script.run
         .withSuccessHandler(res => {
           if (res && res.success && res.list && res.list.length > 0) {
-            LATEST_NEWS_LIST = res.list.map(item => ({ ...item, title: cleanNewsTitle_(item.title) }));
-            CURRENT_NEWS_INDEX = 0;
-            NEWS_DESKTOP_PAGE = 0;
-            NEWS_DESKTOP_LAST_SIG = null; // 새로 불러온 첫 렌더는 애니메이션 없이 바로 표시
-            renderNewsTicker();
-            startNewsTicker();
-          } else {
+            dataCacheSet_('news', res.list);
+            // 저장해 둔 것과 같으면 다시 그리지 않는다(넘기던 뉴스가 처음으로 돌아가지 않게)
+            if (!(usedNewsCache && JSON.stringify(res.list) === cachedNewsSig)) applyNewsList_(res.list);
+          } else if (!usedNewsCache) {
             const titleEl = document.getElementById('newsTickerTitle');
             if (titleEl) titleEl.textContent = '등록된 최신 복지 뉴스가 없습니다.';
           }
+          loaderReady_('news');
         })
         .withFailureHandler(err => {
           console.error('뉴스 로드 실패:', err);
+          loaderReady_('news');
         })
         .getLatestNews(25);
     }
@@ -5511,7 +5536,7 @@
           loaderReady_('fac');
         })
         .withFailureHandler(() => { if (!usedCacheFac) renderDynamicFacilities([]); loaderReady_('fac'); })
-        .getSheetData('회원시설목록', 100, CURRENT_REGION);
+        .getSheetData('회원시설목록', 200, CURRENT_REGION);
 
       // 2·3. 공지사항·교육프로그램은 해당 협회 회원에게만 서버가 내준다 → 로그인 판정이 끝난 뒤 loadLockedData_()가 불러온다
 
